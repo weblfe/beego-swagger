@@ -1,7 +1,6 @@
 package beego_swagger
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	swaggerFiles "github.com/swaggo/files"
@@ -80,7 +79,7 @@ func New(config ...Config) beego.FilterFunc {
 	return func(c *context.Context) {
 		// Set prefix
 		once.Do(func() {
-			prefix = c.Input.Param(routerKey)
+			prefix = parsePrefix(c.Input.Param(routerKey))
 			// Set doc url
 			if len(cfg.URL) == 0 {
 				cfg.URL = path.Join(prefix, defaultDocURL)
@@ -90,7 +89,7 @@ func New(config ...Config) beego.FilterFunc {
 			p      string
 			output = c.Output
 		)
-		if p = parseParamPath(c); p != "" {
+		if p = parseParamPath(c, prefix); p != "" {
 			c.Request.URL.Path = p
 		} else {
 			p = strings.TrimPrefix(c.Request.URL.Path, prefix)
@@ -121,7 +120,8 @@ func New(config ...Config) beego.FilterFunc {
 	}
 }
 
-func parseParamPath(c *context.Context) string {
+// 解析路由
+func parseParamPath(c *context.Context, prefix string) string {
 	var (
 		params = c.Input.Params()
 		size   = len(params)
@@ -138,18 +138,31 @@ func parseParamPath(c *context.Context) string {
 	for k := range params {
 		keys = append(keys, k)
 	}
-	var _path string
+	var (
+		count int
+		_path = defaultIndex
+	)
+	if keys == nil {
+		return _path
+	}
+	if count = len(keys); count <= 0 {
+		return _path
+	}
 	sort.Strings(keys)
-	for _, k := range keys {
-		var value = params[k]
-		if splat == value {
-			continue
-		}
-		if _path == "" {
-			_path = value
-		} else {
-			_path = fmt.Sprintf("%s/%s", _path, value)
-		}
+	if v, ok := params[keys[count-1]]; ok {
+		return v
 	}
 	return _path
+}
+
+// 解析前缀
+func parsePrefix(url string) string {
+	if url == "" {
+		return ""
+	}
+	if strings.Contains(url, "/") {
+		var arr = strings.Split(url, "/")
+		return arr[0]
+	}
+	return url
 }
