@@ -127,11 +127,11 @@ func parseParamPath(c *context.Context) string {
 		size   = len(params)
 	)
 	if size <= 1 {
-		return "/index.html"
+		return defaultIndex
 	}
 	var splat, ok = params[routerKey]
 	if !ok || strings.HasSuffix(splat, "/") {
-		return "index.html"
+		return defaultIndex
 	}
 	var keys []string
 	delete(params, ":splat")
