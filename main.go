@@ -19,6 +19,7 @@ const (
 	defaultIndex    = "index.html"
 	routerKey       = ":splat"
 	contentType     = "Content-Type"
+	contentTypeHtml = "text/html; charset=utf-8"
 	contentTypeJson = "application/json; charset=utf-8"
 )
 
@@ -98,7 +99,7 @@ func New(config ...Config) beego.FilterFunc {
 
 		switch p {
 		case defaultIndex:
-			c.Output.Header(contentType, "")
+			c.Output.Header(contentType, contentTypeHtml)
 			if err := index.Execute(c.ResponseWriter, cfg); err != nil {
 				c.Abort(500, err.Error())
 			}
