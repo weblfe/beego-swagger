@@ -142,6 +142,9 @@ func parseParamPath(c *context.Context) string {
 	sort.Strings(keys)
 	for _, k := range keys {
 		var value = params[k]
+		if splat == value {
+			continue
+		}
 		if _path == "" {
 			_path = value
 		} else {
